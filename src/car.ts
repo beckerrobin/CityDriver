@@ -1,17 +1,20 @@
 export class Car {
     static BASE_COLOR = "#7cc775";
-    static HEIGHT: number; // = Math.floor(ROAD_SIZE / 2 - 4);
+    static WIDTH: number; // = Math.floor(ROAD_SIZE / 2 - 4);
     static LENGTH: number; // = ROAD_SIZE;
-    static SPEED = 3.5;
+    static BASE_SPEED = 3.5;
 
     x: number;
     y: number;
     dir: number;
+    speed: number;
+    
 
     constructor(x: number, y: number, dir: number) {
         this.x = x;
         this.y = y;
         this.dir = dir;
+        this.speed = Car.BASE_SPEED;
     }
     
     static CarFromSpawnPoint(spawnPoint: any) {
@@ -25,7 +28,7 @@ export class Car {
         ctx.rotate((this.dir * 90) * Math.PI / 180);
 
         ctx.fillStyle = Car.BASE_COLOR;
-        ctx.fillRect(-(Car.LENGTH / 2), -(Car.HEIGHT / 2), Car.LENGTH, Car.HEIGHT);
+        ctx.fillRect(-(Car.LENGTH / 2), -(Car.WIDTH / 2), Car.LENGTH, Car.WIDTH);
 
         ctx.restore();
     }

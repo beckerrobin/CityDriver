@@ -6,7 +6,7 @@ const BUILDING_COLOR = "#88a8db";
 const BUILDING_SIZE_MIN = 75;
 const BUILDING_SIZE_MAX = 110;
 const ROAD_SIZE = 30;
-Car.HEIGHT = Math.floor(ROAD_SIZE / 2 - 4);
+Car.WIDTH = Math.floor(ROAD_SIZE / 2 - 4);
 Car.LENGTH = ROAD_SIZE;
 
 const canvas: HTMLCanvasElement = document.querySelector('#screen');
@@ -32,20 +32,34 @@ function loop() {
 function tick() {
     // Move cars
     cars.forEach(car => {
-        switch (car.dir) {
-            case 1:
-                car.y += Car.SPEED;
-                break;
-            case 2:
-                car.x += Car.SPEED;
-                break;
-            case 3:
-                car.y -= Car.SPEED;
-                break;
-            default:
-                car.x -= Car.SPEED;
-                break;
-        }
+        // Collission detection
+        let otherCars = <Array<Car>>cars.filter(filterCar => filterCar !== car);
+        let activeCollision = otherCars.find(otherCar => {
+            if (car.y >= otherCar.y && car.y <= otherCar.y + Car.WIDTH)
+                if (car.x >= otherCar.x && car.x <= otherCar.x + Car.LENGTH)
+                    if (otherCar.speed != 0) {
+                        car.speed = 0;
+                        return true;
+                    }
+            car.speed = Car.BASE_SPEED;
+            return false;
+        })
+        if (activeCollision == undefined)
+            // Move
+            switch (car.dir) {
+                case 1:
+                    car.y += car.speed;
+                    break;
+                case 2:
+                    car.x += car.speed;
+                    break;
+                case 3:
+                    car.y -= car.speed;
+                    break;
+                default:
+                    car.x -= car.speed;
+                    break;
+            }
     })
     cars = cars.filter(car => car.x > 0 &&
         car.x < canvas.width &&
