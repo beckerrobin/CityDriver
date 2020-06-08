@@ -1,3 +1,4 @@
+import Vue from '../vue/vue'
 import { Car } from "./car";
 
 // Constant values
@@ -6,8 +7,8 @@ const BUILDING_COLOR = "#88a8db";
 const BUILDING_SIZE_MIN = 75;
 const BUILDING_SIZE_MAX = 110;
 const ROAD_SIZE = 30;
-Car.WIDTH = Math.floor(ROAD_SIZE / 2 - 4);
-Car.LENGTH = ROAD_SIZE;
+Car.HEIGHT = Math.floor(ROAD_SIZE / 2 - 4);
+Car.WIDTH = ROAD_SIZE;
 
 const canvas: HTMLCanvasElement = document.querySelector('#screen');
 const ctx = canvas.getContext("2d");
@@ -32,39 +33,58 @@ function loop() {
 function tick() {
     // Move cars
     cars.forEach(car => {
-        // Collission detection
+        // Collision detection
         let otherCars = <Array<Car>>cars.filter(filterCar => filterCar !== car);
         let activeCollision = otherCars.find(otherCar => {
-            if (car.y >= otherCar.y && car.y <= otherCar.y + Car.WIDTH)
-                if (car.x >= otherCar.x && car.x <= otherCar.x + Car.LENGTH)
-                    if (otherCar.speed != 0) {
-                        car.speed = 0;
-                        return true;
-                    }
-            car.speed = Car.BASE_SPEED;
-            return false;
+            let collision = car.collisionDetect(otherCar);
+
+            if (collision) {
+                car.color = "#a83232"
+                if (otherCar.speed != 0)
+                    car.speed = 0;
+                else return false;
+            }
+            else {
+                car.speed = Car.BASE_SPEED;
+                car.color = Car.BASE_COLOR;
+            }
+            return collision;
         })
-        if (activeCollision == undefined)
+
+        if (activeCollision == undefined) {
+            // TODO
+            // slow down detection
+            let stoppingLength = 0;
+            for (let speed = car.speed; speed > 0; speed -= Car.BREAK_SPEED) {
+                stoppingLength += speed / Car.BREAK_SPEED;
+            }
+
             // Move
             switch (car.dir) {
                 case 1:
-                    car.y += car.speed;
+                    car.body.y += car.speed;
                     break;
                 case 2:
-                    car.x += car.speed;
+                    car.body.x += car.speed;
                     break;
                 case 3:
-                    car.y -= car.speed;
+                    car.body.y -= car.speed;
                     break;
                 default:
-                    car.x -= car.speed;
+                    car.body.x -= car.speed;
                     break;
             }
+            // If car leaves canvas
+            if (car.body.x < 0 ||
+                car.body.x > canvas.width ||
+                car.body.y < 0 ||
+                car.body.y > canvas.height)
+                car.setSpawnPoint(getRandomSpawnPoint());
+        }
+
     })
-    cars = cars.filter(car => car.x > 0 &&
-        car.x < canvas.width &&
-        car.y > 0 &&
-        car.y < canvas.height);
+
+
 }
 
 function draw() {
@@ -119,11 +139,27 @@ function drawCars() {
     cars.forEach(car => car.drawCar(ctx));
 }
 
+export function distance(x1: number, y1: number, x2: number, y2: number) {
+    return Math.hypot(x1 - x2, y1 - y2);
+}
+
 function spawnACar() {
+    let tries = 0;
     let car = Car.CarFromSpawnPoint(getRandomSpawnPoint());
+
+    // Avoid on-spawn collision
+    let otherCars = cars.filter(otherCar => otherCar !== car);
+    while (otherCars.find(otherCar => car.collisionDetect(otherCar)) !== undefined) {
+        car.setSpawnPoint(getRandomSpawnPoint());
+        if (tries++ > 10) {
+            console.log("Too many cars");
+            return;
+        }
+
+    }
+
     cars.push(car);
 }
-(<HTMLButtonElement>document.querySelector("#spawn-button")).addEventListener("click", spawnACar)
 
 
 function getRandomSpawnPoint() {
@@ -181,3 +217,31 @@ function drawBuilding(x: number, y: number, width: number, height: number) {
     ctx.fillStyle = BUILDING_COLOR;
     ctx.fillRect(x, y, width, height);
 }
+
+// (<HTMLButtonElement>document.querySelector("#spawn-button")).addEventListener("click", spawnACar);
+window.onload = () => {
+
+    (<HTMLInputElement>document.querySelector("#carsNumber-input")).addEventListener("change", ev => {
+        let value = parseInt((<HTMLInputElement>ev.target).value);
+        console.log(value);
+
+        if (cars.length < value)
+            for (let i = value - cars.length; i > 0; i--) {
+                spawnACar();
+            }
+        else if (cars.length > value)
+            while (cars.length > value) {
+                cars.pop();
+            }
+    });
+
+};
+
+new Vue({
+    el: '#carsNumber-input',
+    computed: {
+        noOfCars: () => {
+            return cars.length;
+        }
+    },
+})
