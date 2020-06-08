@@ -31,11 +31,11 @@ function loop() {
 }
 
 function tick() {
-    // Move cars
+    // Collision detection
     cars.forEach(car => {
         // Collision detection
         let otherCars = <Array<Car>>cars.filter(filterCar => filterCar !== car);
-        let activeCollision = otherCars.find(otherCar => {
+        otherCars.find(otherCar => {
             let collision = car.collisionDetect(otherCar);
 
             if (collision) {
@@ -49,9 +49,11 @@ function tick() {
                 car.color = Car.COLOR_BODY;
             }
             return collision;
-        })
-
-        if (activeCollision == undefined) {
+        });
+    });
+    // Move cars
+    cars.forEach(car => {
+        if (car.speed > 0) {
             // TODO
             // slow down detection
             let stoppingLength = 0;
@@ -81,8 +83,7 @@ function tick() {
                 car.body.y > canvas.height)
                 car.setSpawnPoint(getRandomSpawnPoint());
         }
-
-    })
+    });
 }
 
 function draw() {
