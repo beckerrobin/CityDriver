@@ -2,10 +2,12 @@ import { distance } from "./index"
 import { Rectangle } from "./rectangle";
 
 export class Car {
-    static BASE_COLOR = "#7cc775";
+    static COLOR_BODY = "#9cc4d9";
+    static COLOR_HEAD = "#e8e8e8";
+    static COLOR_TAIL = "#9e4242";
     static HEIGHT: number;
     static WIDTH: number;
-    static BASE_SPEED = 3.5;
+    static BASE_SPEED = 3;
     static BREAK_SPEED = 0.5;
 
     body: Rectangle;
@@ -17,7 +19,7 @@ export class Car {
         this.body = new Rectangle(x, y, Car.WIDTH, Car.HEIGHT);
         this.dir = dir;
         this.speed = Car.BASE_SPEED;
-        this.color = Car.BASE_COLOR;
+        this.color = Car.COLOR_BODY;
     }
 
     static CarFromSpawnPoint(spawnPoint: any) {
@@ -34,10 +36,17 @@ export class Car {
         ctx.save();
 
         ctx.translate(this.body.x, this.body.y);
-        ctx.rotate((this.dir * 90) * Math.PI / 180);
+        ctx.rotate(-(this.dir * 90) * Math.PI / 180);
 
         ctx.fillStyle = this.color;
-        ctx.fillRect(-(Car.WIDTH / 2), -(Car.HEIGHT / 2), Car.WIDTH, Car.HEIGHT);
+        ctx.fillRect(-(this.body.width / 2), -(this.body.height / 2), this.body.width, this.body.height);
+        
+        ctx.fillStyle = Car.COLOR_HEAD
+        ctx.fillRect(-(this.body.width / 2) - 1, -(this.body.height / 4) - 2, 3, 4)
+        ctx.fillRect(-(this.body.width / 2) - 1, this.body.height / 4 - 2, 3, 4)
+        ctx.fillStyle = Car.COLOR_TAIL
+        ctx.fillRect((this.body.width / 2) - 3, -(this.body.height / 4) - 2, 3, 4)
+        ctx.fillRect((this.body.width / 2) - 3, this.body.height / 4 - 2, 3, 4)
 
         ctx.restore();
     }

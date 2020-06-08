@@ -46,7 +46,7 @@ function tick() {
             }
             else {
                 car.speed = Car.BASE_SPEED;
-                car.color = Car.BASE_COLOR;
+                car.color = Car.COLOR_BODY;
             }
             return collision;
         })
@@ -62,16 +62,16 @@ function tick() {
             // Move
             switch (car.dir) {
                 case 1:
-                    car.body.y += car.speed;
+                    car.body.y += car.speed; // Down
                     break;
                 case 2:
-                    car.body.x += car.speed;
+                    car.body.x += car.speed; // Right
                     break;
                 case 3:
-                    car.body.y -= car.speed;
+                    car.body.y -= car.speed; // Up
                     break;
                 default:
-                    car.body.x -= car.speed;
+                    car.body.x -= car.speed; // Left
                     break;
             }
             // If car leaves canvas
@@ -83,8 +83,6 @@ function tick() {
         }
 
     })
-
-
 }
 
 function draw() {
